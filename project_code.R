@@ -17,7 +17,7 @@ plot_colors <- list(
 
 # Valid credentials
 valid_credentials <- data.frame(
-  user = c("Hruthika", "user1"),
+  email = c("hruthika@gmail.com", "user1@test.com"),
   password = c("admin123", "user123"),
   stringsAsFactors = FALSE
 )
@@ -32,34 +32,49 @@ ui <- fluidPage(
     tags$head(
       tags$style(HTML("
       
-      /* Top-right tabs */
+      /* Top-right tabs as buttons */
       .login-top-tabs {
         position: absolute;
         top: 20px;
         right: 30px;
         display: flex;
-        gap: 25px;
+        gap: 15px;
         font-size: 15px;
         font-weight: 600;
-        color: ##43627D;
         z-index: 1000;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       }
       
       .login-top-tabs span {
         cursor: pointer;
-        opacity: 0.80;
+        padding: 8px 20px;
+        border-radius: 5px;
+        background-color: #FFFFFF;
+        color: #000000;
+        opacity: 0.8;
+        transition: all 0.2s;
+        border-right: 1px solid #ccc;
+      }
+      
+      .login-top-tabs span:last-child{
+        border-right: none;
       }
       
       .login-top-tabs span:hover {
-        color: #6F8FAF
         opacity: 1;
-        text-decoration: underline;
       }
       
-      .active-tab {
+      .login-top-tabs .active-tab {
         opacity: 1;
-        border-bottom: 2px solid #FFFFFF;
-        padding-bottom: 3px;
+        background-color: #43627D;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        color: #FFFFFF
+      }
+      
+      .login-top-tabs span:hover:not(.active-tab){
+        background-color: #f0f0f0;
       }
       
       /* Wrapper */
@@ -97,44 +112,45 @@ ui <- fluidPage(
         width: 500px;
         background: #FFFFFF;
         padding: 30px;
-        
         display: flex;
         flex-direction: column;
-        #justify-content: center; /* vertical center */
-        
-        
+        margin-top: 80px; /* space from top tabs */
       }
       
-      /* Title */
-      .login-title {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: #36454F;
-      }
+      /* LOGIN PAGE CODE DONE */
+      
+       /* Title */
+       .login-title {
+         font-size: 22px;
+         font-weight: 600;
+         margin-bottom: 20px;
+         color: #36454F;
+        #text-align: center;
+       }
 
+       /* Inputs */
+       .form-control {
+         height: 42px;
+         font-size: 14px;
+         margin-bottom: 15px;
+       }
 
-      /* Inputs */
-      .form-control {
-        height: 42px;
-        font-size: 14px;
-      }
-
-      /* Login button */
-      .login-btn {
-        background-color: #43627D !important;
-        border-color: #43627D !important;
-        color: #FFFFFF !important;
-        width: 120px;
-        font-size: 16px;
-        height: 44px;
-        border-radius: 5px;
+       /* Login/Signup button */
+       .login-btn {
+         background-color: #43627D !important;
+         border-color: #43627D !important;
+         color: #FFFFFF !important;
+         width: 120px;
+         font-size: 16px;
+         height: 44px;
+         border-radius: 5px;
+         cursor: pointer;
       }
 
       .login-btn:hover {
         background-color: #5E7F9F !important;
       }
-
+      
       /* Links */
       .login-links {
         display: flex;
@@ -154,7 +170,7 @@ ui <- fluidPage(
       }
 
       .signup-text {
-        text-align: center;
+        # text-align: center;
         margin-top: 18px;
         font-size: 14px;
       }
@@ -176,6 +192,27 @@ ui <- fluidPage(
     "))
     ),
     
+    # Top-right login/signup tabs
+    # Top-right header buttons
+    div(
+      class = "login-top-tabs",
+      
+      tags$span(
+        "Login",
+        id = "tab_login",
+        class = "top-tab active-tab",
+        onclick = "Shiny.setInputValue('tab_login', Math.random())"
+      ),
+      
+      span(
+        "Sign Up",
+        id = "tab_signup",
+        class = "top-tab",
+        onclick = "Shiny.setInputValue('tab_signup', Math.random())"
+      )
+    ),
+    
+    
     div(class = "login-wrapper",
         
         # LEFT BACKGROUND PANEL
@@ -186,31 +223,149 @@ ui <- fluidPage(
             )
         ),
         
-        # LOGIN CARD (UNCHANGED SIZE)
-        div(class = "login-card",
+        # LOGIN FORM
+        div(id = "login_form", class = "login-card",
+            
             div(class = "login-title", "Login"),
-            textInput("username", "Username", placeholder = "Enter username"),
-            passwordInput("password", "Password", placeholder = "Enter password"),
+            
+            # Email
+            tags$label("Email address"),
+            textInput(
+              "username",
+              NULL,
+              placeholder = "Enter email address"
+            ),
+            
+            # Password
+            tags$label("Password"),
+            passwordInput(
+              "password",
+              NULL,
+              placeholder = "Enter password"
+            ),
+            
+            # Forgot password
             div(class = "login-links",
                 tags$a("Forgot password?")
             ),
+            
             br(),
+            
+            # Login button with icon
             actionButton(
               "login_btn",
               label = tagList(icon("sign-in-alt"), " Login"),
               class = "login-btn"
             ),
+            
             br(),
+            
+            # Login status
             uiOutput("login_status"),
-            div(class = "signup-text",
-                "Don't have an account? ",
-                tags$a("Sign up")
+            
+            # Don't have account text
+            div(
+              class = "signup-text",
+              tagList(
+                "Don’t have an account? ",
+                tags$a(
+                  "Sign up",
+                  href = "#",
+                  onclick = "Shiny.setInputValue('tab_signup', Math.random())"
+                )
+              )
             )
         )
-    )
+        ,
+        
+        # SIGN UP FORM (hidden by default)
+        div(
+          id = "signup_form",
+          class = "login-card",
+          style = "display:none;",
+          
+          # Title
+          div(class = "login-title", "Sign up"),
+          tags$p(
+            "Sign up for free to access to any of our products",
+            style = "font-size:13px; color:#6c757d; margin-bottom:20px;"
+          ),
+          
+          # Email
+          tags$label("Email address"),
+          textInput(
+            "signup_email",
+            NULL,
+            placeholder = "Enter email address"
+          ),
+          
+          # Password
+          tags$label("Password"),
+          passwordInput(
+            "signup_password",
+            NULL,
+            placeholder = "Choose password"
+          ),
+          tags$p(
+            "Use 8 or more characters with a mix of letters, numbers & symbols",
+            style = "font-size:12px; color:#6c757d; margin-top:-10px;"
+          ),
+          
+          # Terms checkbox
+          checkboxInput(
+            "signup_terms",
+            label = tagList(
+              "Agree to our ",
+              tags$a("Terms of use", href = "#"),
+              " and ",
+              tags$a("Privacy Policy", href = "#")
+            ),
+            value = FALSE
+          ),
+          
+          # Fake reCAPTCHA (visual only)
+          div(
+            style = "
+      border:1px solid #d3d3d3;
+      border-radius:4px;
+      padding:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:260px;
+      margin-bottom:20px;
+    ",
+            tags$input(type = "checkbox"),
+            tags$span("I'm not a robot", style = "font-size:13px;")
+          ),
+          
+          # Sign Up button
+          actionButton(
+            "signup_btn",
+            "Sign up",
+            class = "login-btn"
+          ),
+          
+          br(),
+          
+          # Status message
+          uiOutput("signup_status"),
+          
+          # Already have account
+          tags$p(
+            tagList(
+              "Already have an account? ",
+              tags$a(
+                "Log in",
+                href = "#",
+                onclick = "Shiny.setInputValue('tab_login', Math.random())"
+              )
+            ),
+            style = "font-size:13px; margin-top:15px;"
+          )
+        )
+    ),
     
-  ),
-  
   
   #  Dashboard
   hidden(
@@ -234,7 +389,6 @@ ui <- fluidPage(
           ),
           
           dashboardBody(
-            useShinyjs(),  # For dynamic UI elements
             tags$head(
               tags$style(HTML("
       
@@ -483,6 +637,7 @@ ui <- fluidPage(
         )
     )
   )
+ )
 )
 
 # Server
@@ -490,24 +645,107 @@ server <- function(input, output, session) {
   
   datasets <- reactiveValues(uploaded = NULL)
   
-  #  Login Logic
+  # Toggle Login / Sign Up Tabs
+  observeEvent(input$tab_login, {
+    shinyjs::show("login_form")
+    shinyjs::hide("signup_form")
+    
+    # Highlight active tab
+    runjs("
+      document.getElementById('tab_login').classList.add('active-tab');
+      document.getElementById('tab_signup').classList.remove('active-tab');
+    ")
+    
+    # Clear login messages
+    output$login_status <- renderUI({ NULL })
+    output$signup_status <- renderUI({ NULL })
+  })
+  
+  observeEvent(input$tab_signup, {
+    shinyjs::show("signup_form")
+    shinyjs::hide("login_form")
+    
+    # Highlight active tab
+    runjs("
+      document.getElementById('tab_signup').classList.add('active-tab');
+      document.getElementById('tab_login').classList.remove('active-tab');
+    ")
+    
+    # Clear login messages
+    output$login_status <- renderUI({ NULL })
+    output$signup_status <- renderUI({ NULL })
+  })
+  
+  # --------------------------
+  # Login Logic
+  # --------------------------
   observeEvent(input$login_btn, {
     req(input$username, input$password)
     
-    user_match <- valid_credentials$user == input$username
+    user_match <- valid_credentials$email == input$username
     pass_match <- valid_credentials$password == input$password
     
     if (any(user_match & pass_match)) {
       shinyjs::hide("login_page")
       shinyjs::show("dashboard_page")
+      
       output$login_status <- renderUI({
-        "Login successful"})
-    } 
-    else {
+        div(style="color:green;", "Login successful")
+      })
+      
+    } else {
       output$login_status <- renderUI({
         div(class = "login-error", "Invalid username or password!")
       })
     }
+  })
+  
+  
+  # Sign Up Logic
+
+  observeEvent(input$signup_btn, {
+    req(input$signup_email, input$signup_password, input$signup_terms)
+    
+    if (!input$signup_terms) {
+      output$signup_status <- renderUI({
+        div(class = "login-error", "You must agree to the terms.")
+      })
+      return()
+    }
+    
+    # Check if username already exists
+    if (input$signup_email %in% valid_credentials$user) {
+      output$signup_status <- renderUI({
+        div(class = "login-error", "Username already exists!")
+      })
+      return()
+    }
+    
+    # Add new user to valid_credentials (for demo purposes only; not persistent)
+    valid_credentials <<- rbind(valid_credentials, 
+                                data.frame(user = input$signup_email, 
+                                           password = input$signup_password,
+                                           stringsAsFactors = FALSE))
+    
+    output$signup_status <- renderUI({
+      div(style="color:green;", "Sign Up successful! Please login.")
+    })
+    
+    # Switch back to login form
+    shinyjs::show("login_form")
+    shinyjs::hide("signup_form")
+    
+    runjs("
+      document.getElementById('tab_login').classList.add('active-tab');
+      document.getElementById('tab_signup').classList.remove('active-tab');
+    ")
+    
+    # Clear sign-up inputs
+    
+    updateTextInput(session, "signup_email", value = "")
+    updateTextInput(session, "signup_password", value = "")
+    updateTextInput(session, "signup_password", value = "")
+    
   })
   
   #  Logout Logic
